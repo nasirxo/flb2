@@ -14,6 +14,13 @@ python3 flb2.py
 ```
 python3 flb2.py
 ```
+## Update
+```
+cd flb2
+git pull
+python3 flb2.py
+```
+
 ## Login With Cookie
 For Chrome browser install this extension
 https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm?hl=en
