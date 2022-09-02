@@ -51,7 +51,7 @@ banner = f'''{Y}
  / __ \ \__/ / __ \   {W}UPDATED VERSION {R}(FIX){Y}
 / /  \ \____/ /  \ \   {W}    BY {Y}
 \ \__/ / __ \ \__/ /   {W} NASIR ALI{Y}
- \____/ /  \ \____/      {G}V {Y}1.2
+ \____/ /  \ \____/      {G}V {Y}1.3
  
 {Y} Github : {G}https://{W}github.com/nasirxo/flb2
 {Y} Facebook : {G}https://{W}fb.com/nasir.xo
@@ -75,22 +75,22 @@ except:
     from bs4 import BeautifulSoup as bs 
 
 
-if find_executable("flb2") == None:
+if find_executable("flb1.3") == None:
     print(G + bxall + " INSTALLING FLB2 AS SHELL COMMAND ... ")
     L_TYPE = os.popen('echo $HOME').read()
     if "com.termux" in L_TYPE:
          print(f" {W}[{R}!{W}] {G}TERMUX DETECTED !")
          if os.path.exists("flb2.py"):
-             os.system("cp flb2.py $HOME/../usr/bin/flb2")
-             os.system("chmod +x $HOME/../usr/bin/flb2")
+             os.system("cp flb2.py $HOME/../usr/bin/flb1.3")
+             os.system("chmod +x $HOME/../usr/bin/flb1.3")
              print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")
     else:
          print(f" {W}[{R}!{W}] {G}REGULAR LINUX DETECTED !")
          if os.path.exists("flb2.py"):
-             os.system("cp flb2.py /usr/bin/flb2")
-             os.system("chmod +x /usr/bin/flb2")
+             os.system("cp flb2.py /usr/bin/flb1.3")
+             os.system("chmod +x /usr/bin/flb1.3")
              print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")             
-    print(f" {W}[{Y}!{W}] YOU CAN NOW RUN FLB2 BY {G}$FLB2")
+    print(f" {W}[{Y}!{W}] YOU CAN NOW RUN FLB2 BY {G}$FLB1.3")
 
 
 
@@ -99,11 +99,15 @@ def toid(n):
    if '/profile.php' in n:
      if '&fref' in n:
        return n.split('?id=')[1].split('&fref')[0]
+     elif '&eav' in n:
+       return n.split('?id=')[1].split('&eav')[0]
      else:
        return n.split('?id=')[1].split('&refid')[0]
    else:
      if '&fref' in n:
        return n.split('/')[1].split('?fref')[0]
+     elif '&eav' in  n:
+       return n.split('/')[1].split('&eav')[0]
      else:
        return n.split('/')[1].split('?refid')[0]
 
