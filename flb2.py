@@ -75,22 +75,29 @@ except:
     from bs4 import BeautifulSoup as bs 
 
 
-if find_executable("flb1.3") == None:
+def INPUT_ARG():
+   try:
+     return str(sys.argv[1]).upper()
+   except:
+     return ""
+     
+     
+if find_executable("flb2") == None or INPUT_ARG() == "INSTALL":
     print(G + bxall + " INSTALLING FLB2 AS SHELL COMMAND ... ")
     L_TYPE = os.popen('echo $HOME').read()
     if "com.termux" in L_TYPE:
          print(f" {W}[{R}!{W}] {G}TERMUX DETECTED !")
          if os.path.exists("flb2.py"):
-             os.system("cp flb2.py $HOME/../usr/bin/flb1.3")
-             os.system("chmod +x $HOME/../usr/bin/flb1.3")
+             os.system("cp flb2.py $HOME/../usr/bin/flb2")
+             os.system("chmod +x $HOME/../usr/bin/flb2")
              print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")
     else:
          print(f" {W}[{R}!{W}] {G}REGULAR LINUX DETECTED !")
          if os.path.exists("flb2.py"):
-             os.system("cp flb2.py /usr/bin/flb1.3")
-             os.system("chmod +x /usr/bin/flb1.3")
+             os.system("cp flb2.py /usr/bin/flb2")
+             os.system("chmod +x /usr/bin/flb2")
              print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")             
-    print(f" {W}[{Y}!{W}] YOU CAN NOW RUN FLB2 BY {G}$FLB1.3")
+    print(f" {W}[{Y}!{W}] YOU CAN NOW RUN FLB2 BY {G}$FLB2")
 
 
 
@@ -98,18 +105,14 @@ if find_executable("flb1.3") == None:
 def toid(n):
    if '/profile.php' in n:
      if '&fref' in n:
-       return n.split('?id=')[1].split('&fref')[0]
-     elif '&eav' in n:
-       return n.split('?id=')[1].split('&eav')[0]
+       return n.split('?id=')[1].split('&fref')[0].split('&')[0]
      else:
-       return n.split('?id=')[1].split('&refid')[0]
+       return n.split('?id=')[1].split('&')[0]
    else:
      if '&fref' in n:
-       return n.split('/')[1].split('?fref')[0]
-     elif '&eav' in  n:
-       return n.split('/')[1].split('&eav')[0]
+       return n.split('/')[1].split('?fref')[0].split("&")[0].split("?eav")[0]
      else:
-       return n.split('/')[1].split('?refid')[0]
+       return n.split('/')[1].split('?refid')[0].split("&")[0].split("?eav")[0]
 
 def toid2(n):
   if '/profile.php' in n:
@@ -1527,6 +1530,7 @@ class FB:
               'name':X.a.get_text(),
               'id':toid(X.a['href']).split('?fref')[0]
           };i+=1
+          #print(X.a['href'])
         except: pass
   
       try:
@@ -1834,7 +1838,7 @@ if __name__ == '__main__':
        {W}====== (COOKIE FOUND) =======
         {G}[1] LOGIN WITH CURRENT COOKIE
         {G}[2] LOGIN VIA CUSTOM COOKIE
-        {G}[3] REMOVE COOKIE
+        {G}[3] REMOVE COOKIE / LOGOUT
        {W}=============================
      """)   
      while True:
@@ -1874,11 +1878,12 @@ if __name__ == '__main__':
         {G}[2] GROUP MEMBERS BRUTEFORCE
         {G}[3] SEND MESSAGE TO ONLINE FRIENDS
         {G}[4] GENERATE FLB2 ACESS KEY
+        {G}[5] VIEW CRACKED ACCOUNTS        
        {W}=============================
      """)   
    while True:
        INP = input(f"{W} [-] OPTION : {Y}")
-       if INP in list("1234"):
+       if INP in list("12345"):
          if INP == '1': 
             MENUE_MODE = 1
             print(f" {W}[{G}!{W}] {G}ACTIVATED FRIENDLIST BRUTEFORCE MODE")  
@@ -1893,7 +1898,17 @@ if __name__ == '__main__':
             break
          if INP == '4': 
             FLB2_A_KEY = str(f.getkey().decode("utf-8"))
-            print(f" {G}[+]{W} ACESS KEY :{Y}",FLB2_A_KEY)    
+            print(f" {G}[+]{W} ACESS KEY :{Y}",FLB2_A_KEY)   
+         if INP == '5': 
+            try:
+              CRACKED_ACCOUNTS = open("cracked_accounts.txt").read()
+              #CRACKED_ACCOUNTS.replace("[L]"," {W}[{G}L{W}]{G}")
+              #CRACKED_ACCOUNTS.replace("[C]"," {W}[{Y}L{W}]{G}")
+              #CRACKED_ACCOUNTS.replace("|","\t{R}")
+            except:
+              CRACKED_ACCOUNTS = ""             
+            print(f"\n  {W}=========( {G}CRACKED ACCOUNTS {W})======== \n") 
+            print(CRACKED_ACCOUNTS)
        else:
          print(f" {R}[!]{W} Invalid Option Selected ")       
 
