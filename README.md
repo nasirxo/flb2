@@ -53,7 +53,7 @@ then login facebook on your browser manually after sucessfull login press on coo
 
 
 
-## Find Me on :
+## Contact :
 [![Github](https://img.shields.io/badge/Github-nasirxo-green?style=for-the-badge&logo=github)](https://github.com/nasirxo)
 [![Gitlab](https://img.shields.io/badge/Gitlab-nasirxo-green?style=for-the-badge&logo=gitlab)](https://gitlab.com/nasirxo)
 [![Instagram](https://img.shields.io/badge/IG-%40nasir.xoz-red?style=for-the-badge&logo=instagram)](https://www.instagram.com/nasir.xoz)
