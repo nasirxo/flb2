@@ -1903,6 +1903,14 @@ if __name__ == '__main__':
      print(f" {W}[{R}+{W}]{W} Invalid Cookie ! ") 
      exit()
      
+   if "Epsilon" in a_name:
+     try: os.remove("cookie")
+     except: pass
+     try: os.remove(f"{a_id}.ids")
+     except: pass
+     print(f" {W}[{R}+{W}]{W} Account On Checkpoint !") 
+     exit()     
+     
    print(f" {G}[+]{W} Logged In as : {a_name} ")     
    
    MENUE_MODE = 0
