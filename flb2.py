@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from builtins import *
 from math import prod as Statistics
 
