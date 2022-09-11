@@ -1,4 +1,4 @@
-# flb2 v1.8 (UPDATED : 7 SEP 2022) 4X Speed (MultiThreading)
+# flb2 v1.8.1 (UPDATED : 11 SEP 2022) 4X Speed (MultiThreading)
 The Most Fastest Facebook Friend List Bruter 
 
 
