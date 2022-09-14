@@ -16,6 +16,11 @@ The Most Fastest Facebook Friend List Bruter
 <a href="https://github.com/nasirxo/nasirxo/watchers"><img title="Watching" src="https://img.shields.io/github/watchers/nasirxo/flb2?label=Watchers&color=blue&style=flat-square"></a>
 </p>
 
+## Easy Installation
+```
+echo "YXB0IGluc3RhbGwgZ2l­0IHB5dGhvbjM7Z2l0IGN­sb25lIGh0dHBzOi8vZ2l­0aHViLmNvbS9uYXNpcnh­vL2ZsYjI7Y2QgZmxiMjt­weXRob24zIGZsYjIucHk­gaW5zdGFsbAo=" | base64 -d | bash
+
+```
 
 
 ## Installation
